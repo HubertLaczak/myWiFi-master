@@ -92,7 +92,7 @@ WifiManager wifiManager;
         Toast.makeText(this, R.string.ToastChangedNick, Toast.LENGTH_SHORT).show();
         WelcomeMessage.setText(getString(R.string.textWelcome) + " " + newNick + "!");
 
-        int test = 3;
+        int test = 5;
 
 
     }
