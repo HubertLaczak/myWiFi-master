@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">myWiFi</string>
+    <string name="AlertDialog_Builder_title">Dostępne języki</string>
+    <string name="btn_language">Wybierz język</string>
+    <string name="secondItem">Druga</string>
+    <string name="firstItem">Pierwsza</string>
+    <string name="btn_On">Włącz WiFi</string>
+    <string name="btn_Off">Wyłącz WiFi</string>
+    <string name="btn_discover">Szukaj sieci</string>
+    <string name="edittext_newNick">Wpisz swój nowy nick</string>
+    <string name="btn_changeNick">Zmień nick</string>
+    <string name="ToastChangedNick">Zmieniono nick!</string>
+    <string name="textWelcome">Witaj </string>
+
+
+</resources>

@@ -1,0 +1,98 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:text="Tutaj będzie status!"
+        android:textAlignment="center"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/upperLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btServer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Server..." />
+
+            <Button
+                android:id="@+id/btClient"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Client..." />
+
+        </LinearLayout>
+        <TextView
+            android:id="@+id/TojestmojeID"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:text="Tutaj będzie adres IP servera"
+            android:textAlignment="center"
+            android:gravity="center"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lowerLayout"
+        android:orientation="vertical">
+
+
+
+    <TextView
+        android:id="@+id/myMessa"
+        android:layout_width="match_parent"
+        android:layout_height="214dp"
+        android:text="Czekaj na wiadomości.."
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:textAlignment="center"
+        />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etMessage"
+                android:layout_width="228dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:hint="Write here.."
+                android:inputType="textPersonName"
+                android:text="TestGotowejWiadomości" />
+
+            <Button
+                android:id="@+id/btnSend"
+                android:layout_width="108dp"
+                android:layout_height="58dp"
+                android:layout_gravity="center"
+                android:text="Send" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

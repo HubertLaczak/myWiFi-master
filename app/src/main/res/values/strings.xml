@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">myWiFi</string>
+    <string name="AlertDialog_Builder_title">Available languages</string>
+    <string name="btn_language">Choose a language</string>
+    <string name="secondItem">Second</string>
+    <string name="firstItem">First</string>
+    <string name="btn_On">Turn On WiFi</string>
+    <string name="btn_Off">Turn Off WiFi</string>
+    <string name="btn_discover">Discover Network</string>
+    <string name="edittext_newNick">Type new nick</string>
+    <string name="btn_changeNick">Change nick</string>
+    <string name="ToastChangedNick">Success in changing</string>
+    <string name="textWelcome">Welcome </string>
+</resources>
