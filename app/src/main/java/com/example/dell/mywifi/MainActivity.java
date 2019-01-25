@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout upper, lower;
     String txtNickName;
 
+    SharedPreferences sharedPref;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,23 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         txtNickName = sharedPref.getString("NickName", "User");
         Toast.makeText(this, "Witaj " + txtNickName + "!", Toast.LENGTH_SHORT).show();
+
+//        Gson gson = new Gson();
+//        String json = sharedPref.getString("MyObject", "");
+//        sendReceive = gson.fromJson(json, SendReceive.class);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences.Editor prefsEditor = sharedPref.edit();
+//        Gson gson = new Gson();
+//        String json = gson.toJson(sendReceive); // myObject - instance of MyObject
+//        prefsEditor.putString("MyObject", json);
+//        prefsEditor.commit();
+
     }
 
     private class ServerClass extends Thread{
@@ -288,6 +309,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
+
 
     public void findViewByID(){
         status = findViewById(R.id.tvStatus);

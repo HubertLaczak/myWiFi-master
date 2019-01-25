@@ -84,17 +84,12 @@ WifiManager wifiManager;
     }
 
     private void changeNickName(String newNick) {
-//        sharedPref = getPreferences(Context.MODE_PRIVATE);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("NickName", newNick);
         editor.commit();
         Toast.makeText(this, R.string.ToastChangedNick, Toast.LENGTH_SHORT).show();
         WelcomeMessage.setText(getString(R.string.textWelcome) + " " + newNick + "!");
-
-        int test = 5;
-
-
     }
 
 
@@ -161,7 +156,6 @@ WifiManager wifiManager;
         //getResources()..Umożliwia dostęp do zasobów i klas związanych z aplikacją, a także do wywołań dla
         // operacji na poziomie aplikacji, takich jak uruchamianie działań, nadawanie i otrzymywanie zamiarów itp.
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
