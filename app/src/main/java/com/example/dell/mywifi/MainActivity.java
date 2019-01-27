@@ -24,7 +24,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+<<<<<<< HEAD
 import java.io.BufferedOutputStream;
+=======
+import com.google.gson.Gson;
+
+>>>>>>> Commit
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -72,7 +77,11 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout upper, lower;
     String txtNickName;
 
+<<<<<<< HEAD
     KeyGenerator keygen;
+=======
+    SharedPreferences sharedPref;
+>>>>>>> Commit
 
 
     @Override
@@ -127,6 +136,23 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         txtNickName = sharedPref.getString("NickName", "User");
         Toast.makeText(this, "Witaj " + txtNickName + "!", Toast.LENGTH_SHORT).show();
+
+//        Gson gson = new Gson();
+//        String json = sharedPref.getString("MyObject", "");
+//        sendReceive = gson.fromJson(json, SendReceive.class);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+//        SharedPreferences.Editor prefsEditor = sharedPref.edit();
+//        Gson gson = new Gson();
+//        String json = gson.toJson(sendReceive); // myObject - instance of MyObject
+//        prefsEditor.putString("MyObject", json);
+//        prefsEditor.commit();
+
     }
 
     private  class ServerClass extends Thread{
@@ -314,6 +340,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     });
+
+
+
 
 
 
