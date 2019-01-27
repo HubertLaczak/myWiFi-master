@@ -1,10 +1,13 @@
 package com.example.dell.mywifi;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -14,22 +17,33 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class SecondActivity extends AppCompatActivity {
-Button btn_language, btn_OnOff, btn_discover, btn_changeNick;
-EditText text_newNick;
-String language;
-String txtNickName;
-TextView WelcomeMessage;
+    Button btn_language, btn_OnOff, btn_discover, btn_changeNick;
+    EditText text_newNick;
+    String language;
+    String txtNickName;
+    TextView WelcomeMessage;
 
-SharedPreferences sharedPref;
+    SharedPreferences sharedPref;
 
-WifiManager wifiManager;
+    WifiManager wifiManager;
+    ListView listView;
+
+    int size = 0;
+    List<ScanResult> results;
+    ArrayList<String> arrayList = new ArrayList<>();
+    ArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +52,28 @@ WifiManager wifiManager;
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         findViewByID();
-
         clickMe();
     }
 
+    private void findViewByID() {
+        btn_language = findViewById(R.id.btn_language);
+        btn_OnOff = findViewById(R.id.btn_OnOff);
+        btn_discover = findViewById(R.id.btn_Discover);
+        btn_changeNick = findViewById(R.id.btn_changeNick);
+        WelcomeMessage = findViewById(R.id.WelcomeMessage);
+        WelcomeMessage.setText(txtNickName);
 
+        text_newNick = findViewById(R.id.text_newNick);
+
+        if (wifiManager.isWifiEnabled()){
+            btn_OnOff.setText(R.string.btn_Off);
+        } else {
+            btn_OnOff.setText(R.string.btn_On);
+        }
+        listView = findViewById(R.id.wifiList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, arrayList);
+        listView.setAdapter(adapter);
+    }
 
     private void clickMe() {
         btn_OnOff.setOnClickListener(new View.OnClickListener() {
@@ -78,10 +109,25 @@ WifiManager wifiManager;
         btn_discover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                arrayList.clear();
+                registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+                wifiManager.startScan();
+                Toast.makeText(SecondActivity.this, "Scanning...", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+    BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            results = wifiManager.getScanResults();
+            unregisterReceiver(this);
+            for (ScanResult scanResult : results){
+                arrayList.add(scanResult.SSID + "\n" + scanResult.BSSID);
+                adapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     private void changeNickName(String newNick) {
 //        sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -110,22 +156,7 @@ WifiManager wifiManager;
         WelcomeMessage.setText(getString(R.string.textWelcome) + " " + txtNickName + "!");
     }
 
-    private void findViewByID() {
-        btn_language = findViewById(R.id.btn_language);
-        btn_OnOff = findViewById(R.id.btn_OnOff);
-        btn_discover = findViewById(R.id.btn_Discover);
-        btn_changeNick = findViewById(R.id.btn_changeNick);
-        WelcomeMessage = findViewById(R.id.WelcomeMessage);
-        WelcomeMessage.setText(txtNickName);
 
-        text_newNick = findViewById(R.id.text_newNick);
-
-        if (wifiManager.isWifiEnabled()){
-            btn_OnOff.setText(R.string.btn_Off);
-        } else {
-            btn_OnOff.setText(R.string.btn_On);
-        }
-    }
 
 
     private void showChangeLanguageDialog() {

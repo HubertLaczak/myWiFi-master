@@ -14,7 +14,7 @@
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="5dp"/>
 
     <Button
         android:layout_width="match_parent"
@@ -27,6 +27,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/btn_Discover"
         android:text="@string/btn_discover"/>
+    
+    <ListView
+        android:id="@+id/wifiList"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"/>
+
     <Button
         android:id="@+id/btn_language"
         android:layout_width="match_parent"
