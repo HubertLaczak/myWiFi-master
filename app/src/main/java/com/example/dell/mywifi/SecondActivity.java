@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +45,7 @@ public class SecondActivity extends AppCompatActivity {
     List<ScanResult> results;
     ArrayList<String> arrayList = new ArrayList<>();
     ArrayAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +118,7 @@ public class SecondActivity extends AppCompatActivity {
             }
         });
     }
+
 
     BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
