@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -55,6 +56,8 @@ public class SecondActivity extends AppCompatActivity {
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         findViewByID();
         clickMe();
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); //służy do zakrycia klawiatury
+
     }
 
     private void findViewByID() {
@@ -127,8 +130,9 @@ public class SecondActivity extends AppCompatActivity {
             unregisterReceiver(this);
             for (ScanResult scanResult : results){
                 arrayList.add(scanResult.SSID + "\n" + scanResult.BSSID);
-                adapter.notifyDataSetChanged();
             }
+            adapter.notifyDataSetChanged();
+
         }
     };
 
@@ -139,13 +143,6 @@ public class SecondActivity extends AppCompatActivity {
         editor.commit();
         Toast.makeText(this, R.string.ToastChangedNick, Toast.LENGTH_SHORT).show();
         WelcomeMessage.setText(getString(R.string.textWelcome) + " " + newNick + "!");
-<<<<<<< HEAD
-
-        int test = 3;
-
-
-=======
->>>>>>> Commit
     }
 
 

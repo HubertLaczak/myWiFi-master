@@ -1,5 +1,7 @@
 package com.example.dell.mywifi;
 
+import java.net.InetAddress;
+import java.security.MessageDigest;
 import java.util.Base64.*;
 import android.content.Context;
 import android.content.Intent;
@@ -24,44 +26,26 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-<<<<<<< HEAD
-import java.io.BufferedOutputStream;
-=======
-import com.google.gson.Gson;
-
->>>>>>> Commit
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
 
 public class MainActivity extends AppCompatActivity {
 
     Button send;
     Button btServer;
-    Button btClient;
-    EditText writeMsg;
+    Button btClient, resetButton, clientConnect;
+    EditText writeMsg, etIpAddress, etPortNumber;
     TextView status;
     TextView IPadd;
     TextView myMessa;
@@ -73,16 +57,16 @@ public class MainActivity extends AppCompatActivity {
      final int STATE_CONNECTED = 3;
      final int STATE_CONNECTION_FAILED = 4;
      final int STATE_MESSAGE_RECEIVED = 5;
+     final int CHANGE_STRING_CONNECTED_WITH = 6;
+    String connectedWith = "null";
 
-    LinearLayout upper, lower;
+
+    LinearLayout upper, lower, ipAndPortLayout;
     String txtNickName;
 
-<<<<<<< HEAD
-    KeyGenerator keygen;
-=======
-    SharedPreferences sharedPref;
->>>>>>> Commit
-
+    String AES = "AES";
+    String outputString;
+    String key = "toJestKluczZmienGo";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,17 +79,18 @@ public class MainActivity extends AppCompatActivity {
         }       //https://stackoverflow.com/questions/43511365/how-to-socket-thread-in-android-api-25
         findViewByID();
         implementListeners();
-
-
     }
+
+
+
 
     private void implementListeners() {
         btClient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ClientClass clientClass = new ClientClass();
-                clientClass.start();
-                btServer.setEnabled(false);
+                etIpAddress.setVisibility(View.VISIBLE);
+                etPortNumber.setVisibility(View.VISIBLE);
+                clientConnect.setVisibility(View.VISIBLE);
             }
         });
 
@@ -114,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ServerClass serverClass = new ServerClass();
                 serverClass.start();
+                IPadd.setVisibility(View.VISIBLE);
                 IPadd.setText(serverClass.getIpAddress() +" and port: " + serverClass.getPort());
                 btClient.setEnabled(false);
             }
@@ -123,11 +109,42 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String string = String.valueOf(txtNickName + ": " + writeMsg.getText());
-//                byte[]encodeValue = Base64.encode(string.getBytes(), Base64.DEFAULT);
-//                sendReceive.write(encodeValue);
-                sendReceive.write(string.getBytes());
+                try {
+                    outputString = encrypt(string, key);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                sendReceive.write(outputString.getBytes());
             }
         });
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+        clientConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String ipAddress = etIpAddress.getText().toString();
+                int portNumber = Integer.parseInt(etPortNumber.getText().toString());
+                if(!etIpAddress.getText().equals("null")){
+                    ClientClass clientClass = new ClientClass(ipAddress, portNumber);
+                    clientClass.start();
+                    btServer.setEnabled(false);
+                } else {
+                    Toast.makeText(MainActivity.this, "Wrong IPAddress or port number format!", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+
+
+
     }
 
     @Override
@@ -136,23 +153,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         txtNickName = sharedPref.getString("NickName", "User");
         Toast.makeText(this, "Witaj " + txtNickName + "!", Toast.LENGTH_SHORT).show();
-
-//        Gson gson = new Gson();
-//        String json = sharedPref.getString("MyObject", "");
-//        sendReceive = gson.fromJson(json, SendReceive.class);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-//        SharedPreferences.Editor prefsEditor = sharedPref.edit();
-//        Gson gson = new Gson();
-//        String json = gson.toJson(sendReceive); // myObject - instance of MyObject
-//        prefsEditor.putString("MyObject", json);
-//        prefsEditor.commit();
-
     }
 
     private  class ServerClass extends Thread{
@@ -180,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
                     handler.sendMessage(message);
                     sendReceive = new SendReceive(socket);
                     sendReceive.start();
+                    ///////
+                    String string = txtNickName;
+                    sendReceive.write(string.getBytes());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -217,14 +220,13 @@ public class MainActivity extends AppCompatActivity {
             return socketServerPORT;
         }
     }
-
     private class ClientClass extends Thread{
         String dstAddress;
         int dstPort;
 
-        public ClientClass() {
-            dstAddress = "192.168.1.23";//moje
-            dstPort = 8080;//moje
+        public ClientClass(String ipAddress, int portNumer) {
+            dstAddress = ipAddress;
+            dstPort = portNumer;
         }
 
         public void run(){
@@ -236,6 +238,9 @@ public class MainActivity extends AppCompatActivity {
                 handler.sendMessage(message);
                 sendReceive = new SendReceive(socket);
                 sendReceive.start();
+
+                String string = txtNickName;
+                sendReceive.write(string.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
                 Message message = Message.obtain();
@@ -253,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
 //            }
         }
     }
-
     private class SendReceive extends Thread{
         private final Socket socket2;
         private final InputStream inputStream;
@@ -284,7 +288,12 @@ public class MainActivity extends AppCompatActivity {
             while(true){
                 try {
                     bytes = inputStream.read(buffer);
-                    handler.obtainMessage(STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
+                    if(connectedWith.equals("null")) {
+                        handler.obtainMessage(CHANGE_STRING_CONNECTED_WITH, bytes, -1, buffer).sendToTarget();
+                    }
+                    if(!connectedWith.equals("null")){
+                        handler.obtainMessage(STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -308,7 +317,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -320,22 +328,27 @@ public class MainActivity extends AppCompatActivity {
                     status.setText("Connecting  ");
                     break;
                 case STATE_CONNECTED:
-                    status.setText("Connected");
-                    btClient.setEnabled(false);
-                    btServer.setEnabled(false);
-//                    IPadd.setVisibility(View.GONE);
+                    status.setText("Connected with: " + (String)msg.obj);
+                    send.setEnabled(true);
+                    upper.setVisibility(View.GONE); //for upper layout
                     break;
                 case STATE_CONNECTION_FAILED:
                     status.setText("Connecting Failed");
                     break;
                 case STATE_MESSAGE_RECEIVED:
                     byte[] readBuff = (byte[]) msg.obj;//
-//                    byte[] decodeValue = Base64.decode((byte[]) msg.obj, Base64.DEFAULT);
                     String tempMsg = new String(readBuff,0,msg.arg1);
-//                    String tempMsg = new String(decodeValue);
-//                    String tempMsg = new String(decodeValue,0,msg.arg1);
-                    myMessa.setText(tempMsg);
+                    try {
+                        outputString = decrypt(tempMsg, key);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    myMessa.setText(outputString);
                     break;
+                case CHANGE_STRING_CONNECTED_WITH:
+                    byte[] readBuff2 = (byte[]) msg.obj;
+                    connectedWith = new String(readBuff2,0,msg.arg1);
+                    status.setText("Connected with: " + connectedWith);
             }
             return true;
         }
@@ -343,21 +356,52 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-
-
     public void findViewByID(){
         status = findViewById(R.id.tvStatus);
         btServer = findViewById(R.id.btServer);
         btClient = findViewById(R.id.btClient);
+        resetButton = findViewById(R.id.resetButton);
+        clientConnect = findViewById(R.id.clientConnect);
         IPadd = findViewById(R.id.TojestmojeID);
         send = findViewById(R.id.btnSend);
+        send.setEnabled(false);
         writeMsg = findViewById(R.id.etMessage);
         myMessa = findViewById(R.id.myMessa);
 
         upper = findViewById(R.id.upperLayout);
         lower = findViewById(R.id.lowerLayout);
+        ipAndPortLayout = findViewById(R.id.ipAndPortLayout);
+        etIpAddress = findViewById(R.id.etIpAddress);
+        etPortNumber = findViewById(R.id.etPortNumber);
+
+    }
+
+
+    private SecretKeySpec generateKey(String password) throws Exception {
+        final MessageDigest digest = MessageDigest.getInstance("SHA-256"); //tworzenie instancji SkrótuWiadomości z algorytmemSHA-256bit
+        byte[] bytes = password.getBytes("UTF-8");
+        digest.update(bytes, 0, bytes.length); //przekazuje do instancji digest tablicze bytes
+        byte[] key = digest.digest(); //generuje klucz wiadomości w byte, oblicza skrót
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES"); //tworzy klucz z tablicy key zgodny z algorytmem AES
+        return secretKeySpec;
+    }
+    private String encrypt(String Data, String password) throws Exception{
+        SecretKeySpec key = generateKey(password);
+        Cipher c = Cipher.getInstance(AES); //c reprezentuje klasę szyfru
+        c.init(Cipher.ENCRYPT_MODE, key); //inicjalizuje szyfr z danym kluczem, w trybie zmiany wiadomości na szyfr
+        byte[] encVal = c.doFinal(Data.getBytes()); //kończy operację szyfrowania
+        String encryptedValue = Base64.encodeToString(encVal, Base64.DEFAULT); //zamiana na String bez przesunięć/paddingu, DEFAULT
+        return encryptedValue;
+    }
+    private String decrypt(String outputString, String password) throws Exception {
+        SecretKeySpec key = generateKey(password);
+        Cipher c = Cipher.getInstance(AES); //c reprezentuje klasę szyfru
+        c.init(Cipher.DECRYPT_MODE, key); //inicjalizuje szyfr z danym kluczem, w trybie zmiany szyfru na wiadomość
+        byte[] decodedVal = Base64.decode(outputString, Base64.DEFAULT); //zamiana na byte bez przesunięć/paddingu, DEFAULT
+        byte[] decValue = c.doFinal(decodedVal);
+        String decryptedValue = new String(decValue);
+        return decryptedValue;
+
     }
 
     @Override
@@ -366,7 +410,6 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
@@ -380,12 +423,9 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
     private void openActivityMessage() {
         Intent intent = new Intent(MainActivity.this, SecondActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent.putExtra("ip", dstAddress);
-//            intent.putExtra("port", ip);
         startActivity(intent);
         finish();
     }
