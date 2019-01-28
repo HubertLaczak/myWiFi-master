@@ -9,11 +9,9 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.preference.PreferenceManager;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,7 +37,7 @@ public class SecondActivity extends AppCompatActivity {
 
     SharedPreferences sharedPref;
 
-    WifiManager wifiManager;
+    WifiManager wifiManager; //dostarcza podstawowe interfejsy do łączności WiFi
     ListView listView;
 
     int size = 0;
@@ -53,11 +51,20 @@ public class SecondActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         findViewByID();
         clickMe();
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); //służy do zakrycia klawiatury
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        readNickAndSetTextV();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(wifiReceiver);
     }
 
     private void findViewByID() {
@@ -69,7 +76,7 @@ public class SecondActivity extends AppCompatActivity {
         WelcomeMessage.setText(txtNickName);
 
         text_newNick = findViewById(R.id.text_newNick);
-
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifiManager.isWifiEnabled()){
             btn_OnOff.setText(R.string.btn_Off);
         } else {
@@ -78,6 +85,10 @@ public class SecondActivity extends AppCompatActivity {
         listView = findViewById(R.id.wifiList);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, arrayList);
         listView.setAdapter(adapter);
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); //służy do zakrycia klawiatury
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
     }
 
     private void clickMe() {
@@ -93,9 +104,6 @@ public class SecondActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
         btn_language.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,7 +123,6 @@ public class SecondActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 arrayList.clear();
-                registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
                 wifiManager.startScan();
                 Toast.makeText(SecondActivity.this, "Scanning...", Toast.LENGTH_SHORT).show();
             }
@@ -127,7 +134,6 @@ public class SecondActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             results = wifiManager.getScanResults();
-            unregisterReceiver(this);
             for (ScanResult scanResult : results){
                 arrayList.add(scanResult.SSID + "\n" + scanResult.BSSID);
             }
@@ -136,31 +142,7 @@ public class SecondActivity extends AppCompatActivity {
         }
     };
 
-    private void changeNickName(String newNick) {
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("NickName", newNick);
-        editor.commit();
-        Toast.makeText(this, R.string.ToastChangedNick, Toast.LENGTH_SHORT).show();
-        WelcomeMessage.setText(getString(R.string.textWelcome) + " " + newNick + "!");
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        readNickAndSetTextV();
-    }
-
-    private void readNickAndSetTextV(){
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        txtNickName = sharedPref.getString("NickName", "User");
-        WelcomeMessage.setText(getString(R.string.textWelcome) + " " + txtNickName + "!");
-    }
-
-
-
-
+    //AlertDialog, do zmiany języka
     private void showChangeLanguageDialog() {
         final String[] listItems = {"English", "Polski"};
         AlertDialog.Builder builder = new AlertDialog.Builder(SecondActivity.this) //nowe okno AlertDialog
@@ -184,7 +166,7 @@ public class SecondActivity extends AppCompatActivity {
                 .setIcon(R.mipmap.language) //ustawienie ikonki języków
                 .show();    //wyświetla AlertDialog
     }
-//
+    //do zmiany języka
     private void setLocale(String lang) {
         Locale locale = new Locale(lang); //obiekt reprezentujący ustawienia geograficzne, polityczne itp.
         Locale.setDefault(locale);  //ustawienia lokalne dla JVM względem obiektu locale
@@ -217,9 +199,23 @@ public class SecondActivity extends AppCompatActivity {
     private void openActivityMessage() {
         Intent intent = new Intent(SecondActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent.putExtra("ip", dstAddress);
-//            intent.putExtra("port", ip);
         startActivity(intent);
         finish();
+    }
+
+    private void changeNickName(String newNick) {
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref = getApplicationContext().getSharedPreferences("MyPREFERENCES", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("NickName", newNick);
+        editor.commit();
+        Toast.makeText(this, R.string.ToastChangedNick, Toast.LENGTH_SHORT).show();
+        WelcomeMessage.setText(getString(R.string.textWelcome) + " " + newNick + "!");
+    }
+    private void readNickAndSetTextV(){
+//        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref = getApplicationContext().getSharedPreferences("MyPREFERENCES", Context.MODE_PRIVATE);
+        txtNickName = sharedPref.getString("NickName", "User");
+        WelcomeMessage.setText(getString(R.string.textWelcome) + " " + txtNickName + "!");
     }
 }

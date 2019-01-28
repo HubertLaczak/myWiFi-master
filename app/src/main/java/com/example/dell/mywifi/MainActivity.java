@@ -2,6 +2,8 @@ package com.example.dell.mywifi;
 
 import java.net.InetAddress;
 import java.security.MessageDigest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Base64.*;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,6 +37,8 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
@@ -42,15 +47,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button send;
-    Button btServer;
+    Button btServer, send;
     Button btClient, resetButton, clientConnect;
     EditText writeMsg, etIpAddress, etPortNumber;
-    TextView status;
-    TextView IPadd;
-    TextView myMessa;
+    TextView status, IPadd, myMessa;
 
     SendReceive sendReceive;
+
+    ListView mojawiadomosc;
+    ArrayAdapter<String> BTArrayAdapter;
 
      final int STATE_LISTENING = 1;
      final int STATE_CONNECTING = 2;
@@ -79,11 +84,42 @@ public class MainActivity extends AppCompatActivity {
         }       //https://stackoverflow.com/questions/43511365/how-to-socket-thread-in-android-api-25
         findViewByID();
         implementListeners();
+
+
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("MyPREFERENCES", Context.MODE_PRIVATE);
+        txtNickName = sharedPref.getString("NickName", "User");
+        Toast.makeText(this, "Witaj " + txtNickName + "!", Toast.LENGTH_SHORT).show();
+    }
+    public void findViewByID(){
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); //służy do zakrycia klawiatury
+        mojawiadomosc = findViewById(R.id.mojawiadomosc);
+        BTArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        mojawiadomosc.setAdapter(BTArrayAdapter);
 
+        status = findViewById(R.id.tvStatus);
+        btServer = findViewById(R.id.btServer);
+        btClient = findViewById(R.id.btClient);
+        resetButton = findViewById(R.id.resetButton);
+        clientConnect = findViewById(R.id.clientConnect);
+        IPadd = findViewById(R.id.TojestmojeID);
+        send = findViewById(R.id.btnSend);
+        send.setEnabled(false);
+        writeMsg = findViewById(R.id.etMessage);
 
+        upper = findViewById(R.id.upperLayout);
+        lower = findViewById(R.id.lowerLayout);
+        ipAndPortLayout = findViewById(R.id.ipAndPortLayout);
+        etIpAddress = findViewById(R.id.etIpAddress);
+        etPortNumber = findViewById(R.id.etPortNumber);
+
+    }
     private void implementListeners() {
         btClient.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String string = String.valueOf(txtNickName + ": " + writeMsg.getText());
+                String string = String.valueOf(txtNickName + ": " + getNowTime() +  "\n"+ writeMsg.getText() );
                 try {
                     outputString = encrypt(string, key);
                 } catch (Exception e) {
@@ -147,14 +183,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        txtNickName = sharedPref.getString("NickName", "User");
-        Toast.makeText(this, "Witaj " + txtNickName + "!", Toast.LENGTH_SHORT).show();
-    }
-
     private  class ServerClass extends Thread{
         private ServerSocket serverSocket;
         Socket socket;
@@ -180,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     handler.sendMessage(message);
                     sendReceive = new SendReceive(socket);
                     sendReceive.start();
-                    ///////
+
                     String string = txtNickName;
                     sendReceive.write(string.getBytes());
                 }
@@ -220,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
             return socketServerPORT;
         }
     }
+
     private class ClientClass extends Thread{
         String dstAddress;
         int dstPort;
@@ -247,17 +276,9 @@ public class MainActivity extends AppCompatActivity {
                 message.what = STATE_CONNECTION_FAILED;
                 handler.sendMessage(message);
             }
-//        finally {
-//                if (socket != null) {
-//                    try {
-//                        socket.close();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
         }
     }
+
     private class SendReceive extends Thread{
         private final Socket socket2;
         private final InputStream inputStream;
@@ -343,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    myMessa.setText(outputString);
+                    BTArrayAdapter.add(outputString);
                     break;
                 case CHANGE_STRING_CONNECTED_WITH:
                     byte[] readBuff2 = (byte[]) msg.obj;
@@ -353,29 +374,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     });
-
-
-
-    public void findViewByID(){
-        status = findViewById(R.id.tvStatus);
-        btServer = findViewById(R.id.btServer);
-        btClient = findViewById(R.id.btClient);
-        resetButton = findViewById(R.id.resetButton);
-        clientConnect = findViewById(R.id.clientConnect);
-        IPadd = findViewById(R.id.TojestmojeID);
-        send = findViewById(R.id.btnSend);
-        send.setEnabled(false);
-        writeMsg = findViewById(R.id.etMessage);
-        myMessa = findViewById(R.id.myMessa);
-
-        upper = findViewById(R.id.upperLayout);
-        lower = findViewById(R.id.lowerLayout);
-        ipAndPortLayout = findViewById(R.id.ipAndPortLayout);
-        etIpAddress = findViewById(R.id.etIpAddress);
-        etPortNumber = findViewById(R.id.etPortNumber);
-
-    }
-
 
     private SecretKeySpec generateKey(String password) throws Exception {
         final MessageDigest digest = MessageDigest.getInstance("SHA-256"); //tworzenie instancji SkrótuWiadomości z algorytmemSHA-256bit
@@ -403,7 +401,12 @@ public class MainActivity extends AppCompatActivity {
         return decryptedValue;
 
     }
-
+    private String getNowTime() {
+        DateFormat df = new SimpleDateFormat("H:m:s");
+        Date now = Calendar.getInstance().getTime();
+        String text = df.format(now);
+        return text;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();

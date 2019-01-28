@@ -11,4 +11,8 @@
     <string name="btn_changeNick">Change nick</string>
     <string name="ToastChangedNick">Success in changing</string>
     <string name="textWelcome">Welcome </string>
+    <string name="textViewStart">WiFi Chat! </string>
+    <string name="textViewStatusFirst">Here will be the status </string>
+    <string name="btn_send">Send</string>
+    <string name="hintMessage">Write here...</string>
 </resources>

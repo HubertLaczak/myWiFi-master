@@ -12,6 +12,8 @@
     <string name="btn_changeNick">Zmień nick</string>
     <string name="ToastChangedNick">Zmieniono nick!</string>
     <string name="textWelcome">Witaj </string>
-
-
+    <string name="textViewStart">WiFi Chat! </string>
+    <string name="textViewStatusFirst">Tutaj będzie status! </string>
+    <string name="btn_send">Wyślij</string>
+    <string name="hintMessage">Napisz tutaj...</string>
 </resources>
